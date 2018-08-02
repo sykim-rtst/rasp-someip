@@ -1,4 +1,6 @@
 #include <types.h>
+#include <etif.h>
+#include <netif/etharp.h>
 
 #ifndef __SOMEIP_H__
 #define __SOMEIP_H__
@@ -45,5 +47,9 @@ int stop_offer_service(service_t my_id, service_t service_id, instance_t instanc
 int request_service(someip_service_t my_id, service_t service_id, instance_t instance,
                     void (*avail_handler)(service_t service, instance_t instance, int available));
 int release_service(someip_service_t my_id, service_t service_id, instance_t instance);
+
+void run_someip_sd_srv(ip_addr local_ip, unsigned short port);
+void run_someip_srv(ip_addr local_ip, unsigned short port);
+void run_someip_handler(ip_addr local_ip);
 
 #endif

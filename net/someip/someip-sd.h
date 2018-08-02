@@ -1,5 +1,15 @@
 #include <types.h>
-
+#include <lwip/arch/sys_arch.h>
+#include <lwip/opt.h>
+#include <lwip/mem.h>
+#include <lwip/memp.h>
+#include <lwip/def.h>
+#include <lwip/pbuf.h>
+#include <lwip/sys.h>
+#include <lwip/tcpip.h>
+#include <lwip/api.h>
+#include <lwip/netif.h>
+#include <ipv4/lwip/ip_addr.h>
 #ifndef __SOMEIP_SD_H__
 #define __SOMEIP_SD_H__
 
@@ -81,4 +91,9 @@ int someip_add_msg_handler(service_t my_id, service_t service_id,
 msg_handler_list_t *someip_find_msg_handler(uint16_t service_id, uint16_t req_id,
         uint16_t instance, uint16_t method);
 int someip_del_msg_handler(msg_handler_list_t *msg_del);
+
+
+void handle_someip_packet(netbuf *buf);
+void handle_someip_sd_packet(netbuf *buf);
+
 #endif
