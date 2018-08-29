@@ -1,14 +1,15 @@
 #include <stdio.h>
 #include <someip/someip.h>
 #include "someip-sd.h"
-#include <etif.h>
+#include <ethif.h>
 #include <netif/etharp.h>
 
 
-void run_someip_sd_srv(ip_addr local_ip, unsigned short port)
+void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port)
 {
     struct netconn *conn = NULL;
-    struct ip_addr ip;
+    ip_addr_t ip;
+    int rc1;
 
     conn = netconn_new (NETCONN_UDP);
 
@@ -39,7 +40,7 @@ void run_someip_sd_srv(ip_addr local_ip, unsigned short port)
         struct netbuf *buf;
         u16_t len;
 
-        if ((buf = netconn_recv (conn)) != NULL) {
+        if ( netconn_recv (conn, &buf) == ERR_OK) {
             handle_someip_sd_packet(buf);
 
             netbuf_delete(buf);
@@ -49,10 +50,12 @@ void run_someip_sd_srv(ip_addr local_ip, unsigned short port)
     }
 }
 
-void run_someip_srv(ip_addr local_ip, unsigned short port)
+void run_someip_srv(ip_addr_t *local_ip, unsigned short port,
+                    service_t service_id, instance_t instance_id)
 {
     struct netconn *conn = NULL;
-    struct ip_addr ip;
+    ip_addr_t ip;
+    int rc1;
 
     conn = netconn_new (NETCONN_UDP);
 
@@ -77,13 +80,23 @@ void run_someip_srv(ip_addr local_ip, unsigned short port)
         return;
     }
 
+    someip_offering_service_t *offer  =
+        (someip_offering_service_t *)malloc(sizeof(someip_offering_service_t));
+
+    offer->service_id = service_id;
+    offer->instance = instance_id;
+    offer->ipv4_addr = *(uint32_t *)local_ip;
+    offer->port = port;
+
+    someip_add_offering_service(offer);
+
     while (1) {
         //	IP4_ADDR(&remote_ip, 10, 0, 0, 11);
         int err;
         struct netbuf *buf;
         u16_t len;
 
-        if ((buf = netconn_recv (conn)) != NULL) {
+        if (netconn_recv (conn, &buf) == ERR_OK) {
             handle_someip_sd_packet(buf);
 
             netbuf_delete(buf);
@@ -92,4 +105,4 @@ void run_someip_srv(ip_addr local_ip, unsigned short port)
         }
     }
 }
-void run_someip_handler(ip_addr local_ip);
+void run_someip_handler(ip_addr_t *local_ip);

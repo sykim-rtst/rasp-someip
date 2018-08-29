@@ -1,9 +1,13 @@
 #include <types.h>
-#include <etif.h>
+#include <lwip/sockets.h>
+#include <ethif.h>
 #include <netif/etharp.h>
+#include <lwip/sys.h>
 
 #ifndef __SOMEIP_H__
 #define __SOMEIP_H__
+
+
 typedef struct someip_header_s {
     uint32_t    msg_id;
     uint32_t    length;
@@ -13,11 +17,11 @@ typedef struct someip_header_s {
     uint8_t     msg_type;
     uint8_t     ret_code;
     uint8_t     payload[0];
-} __attribute__((packted)) someip_t;
+} __attribute__((packed)) someip_t;
 
 enum someip_state {
-    ST_REGISTERED;
-}
+    ST_REGISTERED
+};
 
 typedef struct someip_service_s {
     uint16_t    service_id;
@@ -48,8 +52,8 @@ int request_service(someip_service_t my_id, service_t service_id, instance_t ins
                     void (*avail_handler)(service_t service, instance_t instance, int available));
 int release_service(someip_service_t my_id, service_t service_id, instance_t instance);
 
-void run_someip_sd_srv(ip_addr local_ip, unsigned short port);
-void run_someip_srv(ip_addr local_ip, unsigned short port);
-void run_someip_handler(ip_addr local_ip);
+void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port);
+void run_someip_srv(ip_addr_t *local_ip, unsigned short port, service_t service_id, instance_t instance_id);
+void run_someip_handler(ip_addr_t *local_ip);
 
 #endif

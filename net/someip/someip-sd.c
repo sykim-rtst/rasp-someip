@@ -2,106 +2,119 @@
 #include <someip/someip.h>
 #include "someip-sd.h"
 
-msg_handler_list_t msg_head;
-someip_requested_service_t srv_head;
-
-int someip_add_req_service(someip_requeted_service_t *service)
+int send_offer_service(someip_offering_service_t *offer)
 {
-    someip_reqested_service_t *srv = &srv_head;
+    return -1;
+}
 
-    if(someip_find_req_service(service->service_id, service->req->service_id,
-                               service->instance)) {
-        return 0;
-    }
+void handle_someip_packet(struct netbuf *buf)
+{
 
-    service->next = srv->next;
-    srv->next = service;
+    return;
 
-    return 0;
 }
 
 
-someip_requeted_service_t *someip_find_req_service(uint16_t service_id,
-        uint16_t req_id, uint16_t instance)
+void handle_findservice(ip_addr_t *addr, unsigned short port, char *data_ptr, unsigned long entries_len)
 {
+    someip_sd_entry_t *entry = (someip_sd_entry_t *)data_ptr;
+    someip_offering_service_t *offer;
 
-    someip_reqested_service_t *srv = srv_head.next;
+    offer = someip_find_offering_service(entry->t1.service_id, entry->t1.instance_id);
 
-    while(srv) {
-        if(srv->service_id == service_id &&
-                srv->req->service_id == my_id &&
-                srv->instance == instance) {
-            return srv;
+    if(!offer) {
+        return;
+    }
+
+    send_offer_service(offer);
+
+}
+
+
+void handle_offerservice(ip_addr_t *addr, unsigned short port, char *data_ptr, unsigned long entries_len)
+{
+    someip_sd_entry_t *entry = (someip_sd_entry_t *)data_ptr;
+    someip_offering_service_t *offer = (someip_offering_service_t *)malloc(sizeof(someip_offering_service_t));
+    char *ptr;
+
+    offer->service_id = entry ->t1.service_id;
+    offer->instance = entry->t1.instance_id;
+
+    unsigned int opt1_idx = entry->t1.idx_1st_opt;
+    unsigned int opt1_num = entry->t1.num_opts >> 4;
+
+    ptr = data_ptr + entries_len + 4;
+
+    int i = 0;
+
+    for(i = 0; i < opt1_idx; ++i) {
+        ptr += *((uint16_t *)ptr) + 3;
+    }
+
+    offer->ipv4_addr = ((uint32_t *)ptr)[1];
+    offer->port = ((uint16_t *)ptr)[5];
+
+    someip_add_offering_service(offer);
+
+    someip_requested_service_t *req = someip_find_req_service(offer->service_id, 0xffff, offer->instance);
+
+    if(req) {
+        req->offer = offer;
+
+        if(!req->availabiltity) {
+            req->availabiltity = 1;
+
+            if(req->avail_handler) {
+                req->avail_handler(offer->service_id, offer->instance, 1);
+            }
+        }
+    }
+}
+
+
+void handle_someip_sd_packet(struct netbuf *buf)
+{
+    unsigned char *recv_data, *data_ptr;
+    ip_addr_t *addr;
+    unsigned short port;
+    unsigned long entries_len, len;
+
+    someip_sd_header_t *sd_header;
+
+    addr = netbuf_fromaddr(buf);
+    port = netbuf_fromport(buf);
+    netbuf_data(buf, &recv_data, &len);
+    printf("\r\n(1) Received data %d %s\r\n", len, (char *) recv_data);
+
+    sd_header = (someip_sd_header_t *)recv_data;
+
+    if(sd_header->proto_ver != 0x01 || sd_header->if_ver != 0x01 ||
+            sd_header->msg_type != 0x02 || sd_header->ret_code != 0x00) {
+        printf("this packet may not be a someip-sd\r\n");
+        return;
+    }
+
+    data_ptr = recv_data + sizeof(someip_sd_header_t);
+    entries_len = ntohl(*((unsigned long *)data_ptr));
+
+    data_ptr += sizeof(unsigned long);
+
+    while(entries_len) {
+        switch(*data_ptr ) {
+            case 0x00:
+                handle_findservice(addr, port, data_ptr, entries_len);
+                break;
+
+            case 0x01:
+                handle_offerservice(addr, port, data_ptr, entries_len);
+                break;
+
+            default:
+                printf("unsupported entry type\r\n");
         }
 
-        srv = srv->next;
+        entries_len -= sizeof(someip_sd_entry_t);
+        data_ptr += sizeof(someip_sd_entry_t);
     }
 
-    return srv;
-}
-
-
-int someip_add_msg_handler(service_t my_id, service_t service_id,
-                           instance_t instance, method_t method, void (*msg_handler)(someip_t *someip))
-{
-    msg_handler_list_t *msg = &msg_head;
-    msg_handler_list_t *new_m;
-    new_m = someip_find_msg_handler(service_id, my_id, instance, method);
-
-    if(new_m) {
-        new_m->msg_handler = msg_handler;
-        return 0;
-    }
-
-    new_m = (msg_handler_list_t *)malloc(sizeof(msg_handler_list_t));
-
-    new_m->req_id = my_id;
-    new_m->service_id = service_id;
-    new_m->instance = instance;
-    new_m->method = method;
-    new_m->msg_handler = msg_handler;
-
-    new_m->next = msg->next;
-    msg->next = new_m;
-
-    return 0;
-
-}
-
-msg_handler_list_t *someip_find_msg_handler(uint16_t service_id, uint16_t req_id,
-        uint16_t instance, uint16_t method);
-{
-
-    msg_handler_list_t *msg = msg_headi.next;
-
-    while(msg) {
-        if(msg->service_id == service_id &&
-                msg->req_id == my_id &&
-                msg->instance == instance &&
-                msg->method == method) {
-            return msg;
-        }
-
-        msg = msg->next;
-    }
-
-    return msg;
-}
-
-int someip_del_msg_handler(msg_handler_list_t *msg_del)
-{
-
-    msg_handler_list_t *msg = &msg_head;
-
-    while(msg) {
-        if(msg->next && msg->next == msg_del) {
-            msg->next = msg_del->next;
-            free(msg_del);
-            return 0;
-        }
-
-        msg = msg->next;
-    }
-
-    return -RTWORKS_ERRNO_NOTFOUND;
 }
