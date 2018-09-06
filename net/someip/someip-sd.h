@@ -81,7 +81,7 @@ typedef struct someip_offering_service_s {
 
 typedef struct someip_requested_service_s {
     struct someip_requested_service_s *next;
-    someip_service_t    *req;
+    someip_app_t    *req;
     uint16_t    service_id;
     uint16_t    instance;
     void (*avail_handler)(service_t service, instance_t instance, int available);

@@ -22,7 +22,7 @@ void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port)
         printf("\r\nserver netconn_new OK\r\n");
     }
 
-    rc1 = netconn_bind (conn, &local_ip, port);
+    rc1 = netconn_bind (conn, local_ip, port);
 
     if (rc1 != ERR_OK) {
         printf("\r\nserver netconn_bind ERROR\r\n");
@@ -34,6 +34,8 @@ void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port)
         return;
     }
 
+    printf("someip-SD server ready\r\n");
+
     while (1) {
         //	IP4_ADDR(&remote_ip, 10, 0, 0, 11);
         int err;
@@ -41,6 +43,7 @@ void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port)
         u16_t len;
 
         if ( netconn_recv (conn, &buf) == ERR_OK) {
+            printf("connected \r\n");
             handle_someip_sd_packet(buf);
 
             netbuf_delete(buf);
@@ -50,8 +53,7 @@ void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port)
     }
 }
 
-void run_someip_srv(ip_addr_t *local_ip, unsigned short port,
-                    service_t service_id, instance_t instance_id)
+void run_someip_srv(ip_addr_t *local_ip, unsigned short port)
 {
     struct netconn *conn = NULL;
     ip_addr_t ip;
@@ -80,15 +82,6 @@ void run_someip_srv(ip_addr_t *local_ip, unsigned short port,
         return;
     }
 
-    someip_offering_service_t *offer  =
-        (someip_offering_service_t *)malloc(sizeof(someip_offering_service_t));
-
-    offer->service_id = service_id;
-    offer->instance = instance_id;
-    offer->ipv4_addr = *(uint32_t *)local_ip;
-    offer->port = port;
-
-    someip_add_offering_service(offer);
 
     while (1) {
         //	IP4_ADDR(&remote_ip, 10, 0, 0, 11);

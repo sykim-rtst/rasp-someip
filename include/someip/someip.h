@@ -23,18 +23,17 @@ enum someip_state {
     ST_REGISTERED
 };
 
-typedef struct someip_service_s {
+typedef struct someip_app_s {
     uint16_t    service_id;
-    uint16_t    instance_id;
     void        (*state_handler)(int state);
     int         state;
-} someip_service_t;
+} someip_app_t;
 
 typedef uint16_t service_t;
 typedef uint16_t instance_t;
 typedef uint16_t method_t;
 
-someip_service_t *someip_register_service(service_t service_id, instance_t instance);
+someip_app_t *someip_register_service(service_t service_id, instance_t instance);
 int someip_register_msg_handler(service_t my_id, service_t service_id,
                                 instance_t instance, method_t method, void (*msg_handler)(someip_t *someip));
 int someip_unregister_msg_handler(service_t my_id, service_t service_id,
@@ -48,12 +47,12 @@ int someip_register_state_handler(service_t my_id, service_t service_id,
 int someip_unregister_state_handler(service_t my_id, service_t service_id, instance_t instance);
 int offer_service(service_t my_id, service_t service_id, instance_t instance);
 int stop_offer_service(service_t my_id, service_t service_id, instance_t instance);
-int request_service(someip_service_t my_id, service_t service_id, instance_t instance,
+int request_service(someip_app_t my_id, service_t service_id, instance_t instance,
                     void (*avail_handler)(service_t service, instance_t instance, int available));
-int release_service(someip_service_t my_id, service_t service_id, instance_t instance);
+int release_service(someip_app_t my_id, service_t service_id, instance_t instance);
 
 void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port);
-void run_someip_srv(ip_addr_t *local_ip, unsigned short port, service_t service_id, instance_t instance_id);
+void run_someip_srv(ip_addr_t *local_ip, unsigned short port);
 void run_someip_handler(ip_addr_t *local_ip);
 
 #endif

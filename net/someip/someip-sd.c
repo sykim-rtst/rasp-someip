@@ -40,6 +40,7 @@ void handle_offerservice(ip_addr_t *addr, unsigned short port, char *data_ptr, u
     offer->service_id = entry ->t1.service_id;
     offer->instance = entry->t1.instance_id;
 
+    //printf("service id: %04x instance id: %04x\r\n",offer->service_id, offer->instance);
     unsigned int opt1_idx = entry->t1.idx_1st_opt;
     unsigned int opt1_num = entry->t1.num_opts >> 4;
 
@@ -47,12 +48,16 @@ void handle_offerservice(ip_addr_t *addr, unsigned short port, char *data_ptr, u
 
     int i = 0;
 
+    //printf("opt index: %d num: %d\r\n",opt1_idx,opt1_num);
     for(i = 0; i < opt1_idx; ++i) {
         ptr += *((uint16_t *)ptr) + 3;
     }
 
     offer->ipv4_addr = ((uint32_t *)ptr)[1];
     offer->port = ((uint16_t *)ptr)[5];
+
+    uint8_t *ip = (uint8_t *)(&(offer->ipv4_addr));
+    //printf("ipv4 addr: %d.%d.%d.%d port: %lu\r\n",ip[0], ip[1], ip[2], ip[3], offer->port);
 
     someip_add_offering_service(offer);
 
@@ -84,7 +89,17 @@ void handle_someip_sd_packet(struct netbuf *buf)
     addr = netbuf_fromaddr(buf);
     port = netbuf_fromport(buf);
     netbuf_data(buf, &recv_data, &len);
-    printf("\r\n(1) Received data %d %s\r\n", len, (char *) recv_data);
+
+    /*
+    printf("\r\n(1) Received data %d\r\n", len);
+
+    int i;
+    for(i=0;i<len && i<90;++i){
+        if(i % 8 == 0)
+            printf("\r\n");
+        printf("%02x ",recv_data[i]);
+    }
+    */
 
     sd_header = (someip_sd_header_t *)recv_data;
 
@@ -102,10 +117,12 @@ void handle_someip_sd_packet(struct netbuf *buf)
     while(entries_len) {
         switch(*data_ptr ) {
             case 0x00:
+                printf("Got findservice\r\n");
                 handle_findservice(addr, port, data_ptr, entries_len);
                 break;
 
             case 0x01:
+                printf("Got Offerservice\r\n");
                 handle_offerservice(addr, port, data_ptr, entries_len);
                 break;
 

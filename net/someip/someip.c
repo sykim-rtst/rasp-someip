@@ -2,18 +2,17 @@
 #include <someip/someip.h>
 #include "someip-sd.h"
 
-someip_service_t *someip_register_service(service_t my_id, instance_t instance)
+someip_app_t *someip_register_service(service_t my_id)
 {
-    someip_service_t *srv;
+    someip_app_t *srv;
 
-    srv = (someip_service_t *)malloc(sizeof(someip_service_t));
+    srv = (someip_app_t *)malloc(sizeof(someip_service_t));
 
     if(!srv) {
         return NULL;
     }
 
     srv->service_id = my_id;
-    srv->instance = instance;
     return srv;
 }
 
@@ -45,7 +44,7 @@ int someip_unregister_msg_handler(service_t my_id, service_t service_id,
 }
 
 int someip_register_state_handler(service_t my_id, service_t service_id,
-                                  instance_t instance, void (*state_hander)(int state));
+                                  void (*state_hander)(int state));
 {
     int err;
     someip_requeted_service_t *req;
@@ -77,12 +76,12 @@ int someip_unregister_state_handler(service_t my_id, service_t service_id, insta
 }
 int offer_service(service_t my_id, service_t service_id, instance_t instance);
 int stop_offer_service(service_t my_id, service_t service_id, instance_t instance);
-int request_service(someip_service_t my_id, service_t service_id, instance_t instance,
+int request_service(someip_app_t my_id, service_t service_id, instance_t instance,
                     void (*avail_handler)(service_t service, instance_t instance, int available) )
 {
     someip_reqested_service_t *srv;
 
-    srv = (someip_service_t *)malloc(sizeof(someip_requested_service_t));
+    srv = (someip_app_t *)malloc(sizeof(someip_requested_service_t));
 
     if(!srv) {
         return NULL;
