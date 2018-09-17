@@ -8,6 +8,7 @@ LO_TARGET=  someip.lo
 LO_OBJS=   	someip-sd.o \
 			someip-lists.o \
 			someip-sock.o \
+			someip.o
 
 
 

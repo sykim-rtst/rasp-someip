@@ -2,32 +2,32 @@
 #include <someip/someip.h>
 #include "someip-sd.h"
 
-someip_app_t *someip_register_service(service_t my_id)
+someip_app_t *someip_register_app(client_t my_id)
 {
     someip_app_t *srv;
 
-    srv = (someip_app_t *)malloc(sizeof(someip_service_t));
+    srv = (someip_app_t *)malloc(sizeof(someip_app_t));
 
     if(!srv) {
         return NULL;
     }
 
-    srv->service_id = my_id;
+    srv->client_id = my_id;
     return srv;
 }
 
-int someip_register_msg_handler(service_t my_id, service_t service_id,
+int someip_register_msg_handler(client_t my_id, service_t service_id,
                                 instance_t instance, method_t method, void (*msg_handler)(someip_t *someip))
 {
     int err;
 
-    err = someip_find_service(my_id, service_id, instance, method, msg_handler);
+    err = someip_add_msg_handler(my_id, service_id, instance, method, msg_handler);
 
     return err;
 }
 
 int someip_unregister_msg_handler(service_t my_id, service_t service_id,
-                                  instance_t instance, method_t method);
+                                  instance_t instance, method_t method)
 {
     int err;
     msg_handler_list_t *handler;
@@ -43,6 +43,7 @@ int someip_unregister_msg_handler(service_t my_id, service_t service_id,
     return 0;
 }
 
+/*
 int someip_register_state_handler(service_t my_id, service_t service_id,
                                   void (*state_hander)(int state));
 {
@@ -74,26 +75,32 @@ int someip_unregister_state_handler(service_t my_id, service_t service_id, insta
 
     return 0;
 }
+
+*/
+
 int offer_service(service_t my_id, service_t service_id, instance_t instance);
 int stop_offer_service(service_t my_id, service_t service_id, instance_t instance);
-int request_service(someip_app_t my_id, service_t service_id, instance_t instance,
-                    void (*avail_handler)(service_t service, instance_t instance, int available) )
+someip_req_t request_service(someip_app_t *app, service_t service_id, instance_t instance,
+                             void (*avail_handler)(service_t service, instance_t instance, int available) )
 {
-    someip_reqested_service_t *srv;
+    someip_requested_service_t *srv;
 
-    srv = (someip_app_t *)malloc(sizeof(someip_requested_service_t));
+    srv = (someip_requested_service_t *)malloc(sizeof(someip_requested_service_t));
 
     if(!srv) {
         return NULL;
     }
 
-    srv->req = my_id;
+    srv->req = app;
     srv->service_id = service_id;
     srv->instance = instance;
-    srv->avail_handler = avial_handler;
+    srv->avail_handler = avail_handler;
 
-    return someip_add_req_service(srv);
+    someip_add_req_service(srv);
+
+
+    return (someip_req_t)srv;
 
 }
 
-int release_service(service_t my_id, service_t service_id, instance_t instance);
+//int release_service(service_t my_id, service_t service_id, instance_t instance);

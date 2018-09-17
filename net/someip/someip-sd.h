@@ -106,7 +106,7 @@ int someip_add_req_service(someip_requested_service_t *service);
 someip_requested_service_t *someip_find_req_service(uint16_t service_id, uint16_t req_id, uint16_t instance);
 int someip_del_req_service(someip_requested_service_t *service);
 
-int someip_add_msg_handler(service_t my_id, service_t service_id,
+int someip_add_msg_handler(client_t my_id, service_t service_id,
                            instance_t instance, method_t method, void (*msg_handler)(someip_t *someip));
 msg_handler_list_t *someip_find_msg_handler(uint16_t service_id, uint16_t req_id,
         uint16_t instance, uint16_t method);

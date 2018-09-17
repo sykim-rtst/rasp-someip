@@ -61,7 +61,7 @@ int someip_add_req_service(someip_requested_service_t *service)
     someip_requested_service_t *srv = &srv_head;
     someip_requested_service_t *same;
 
-    if(someip_find_req_service(service->service_id, service->req->service_id,
+    if(someip_find_req_service(service->service_id, service->req->client_id,
                                service->instance)) {
         someip_del_req_service(same);
     }
@@ -81,7 +81,7 @@ someip_requested_service_t *someip_find_req_service(uint16_t service_id,
 
     while(srv) {
         if(srv->service_id == service_id &&
-                (srv->req->service_id == req_id || req_id == 0xffff) &&
+                (srv->req->client_id == req_id || req_id == 0xffff) &&
                 (srv->instance == instance ||  instance == 0xffff || srv->instance == 0xffff)) {
             return srv;
         }
@@ -93,7 +93,7 @@ someip_requested_service_t *someip_find_req_service(uint16_t service_id,
 }
 
 
-int someip_add_msg_handler(service_t my_id, service_t service_id,
+int someip_add_msg_handler(client_t my_id, service_t service_id,
                            instance_t instance, method_t method, void (*msg_handler)(someip_t *someip))
 {
     msg_handler_list_t *msg = &msg_head;
