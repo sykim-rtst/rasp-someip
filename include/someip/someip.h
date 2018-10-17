@@ -57,4 +57,5 @@ void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port);
 void run_someip_srv(ip_addr_t *local_ip, unsigned short port);
 void run_someip_handler(ip_addr_t *local_ip);
 
+int someip_send_request(service_t service, instance_t instance, someip_t *packet);
 #endif

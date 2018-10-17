@@ -43,6 +43,20 @@ int someip_unregister_msg_handler(service_t my_id, service_t service_id,
     return 0;
 }
 
+int someip_send_request(service_t service, instance_t instance, someip_t *packet)
+{
+    someip_offering_service_t *offer =
+        someip_find_offering_service(service, instance);
+
+    if(!offer) {
+        return -1;
+    }
+
+
+    send_packet(offer->ipv4_addr, offer->port, (char *)packet, packet->length + 8);
+
+}
+
 /*
 int someip_register_state_handler(service_t my_id, service_t service_id,
                                   void (*state_hander)(int state));

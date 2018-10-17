@@ -40,7 +40,7 @@ void handle_offerservice(ip_addr_t *addr, unsigned short port, char *data_ptr, u
     offer->service_id = entry ->t1.service_id;
     offer->instance = entry->t1.instance_id;
 
-    //printf("service id: %04x instance id: %04x\r\n",offer->service_id, offer->instance);
+    printf("service id: %04x instance id: %04x\r\n", offer->service_id, offer->instance);
     unsigned int opt1_idx = entry->t1.idx_1st_opt;
     unsigned int opt1_num = entry->t1.num_opts >> 4;
 
@@ -48,7 +48,8 @@ void handle_offerservice(ip_addr_t *addr, unsigned short port, char *data_ptr, u
 
     int i = 0;
 
-    //printf("opt index: %d num: %d\r\n",opt1_idx,opt1_num);
+    printf("opt index: %d num: %d\r\n", opt1_idx, opt1_num);
+
     for(i = 0; i < opt1_idx; ++i) {
         ptr += *((uint16_t *)ptr) + 3;
     }
@@ -57,7 +58,7 @@ void handle_offerservice(ip_addr_t *addr, unsigned short port, char *data_ptr, u
     offer->port = ((uint16_t *)ptr)[5];
 
     uint8_t *ip = (uint8_t *)(&(offer->ipv4_addr));
-    //printf("ipv4 addr: %d.%d.%d.%d port: %lu\r\n",ip[0], ip[1], ip[2], ip[3], offer->port);
+    printf("ipv4 addr: %d.%d.%d.%d port: %lu\r\n", ip[0], ip[1], ip[2], ip[3], offer->port);
 
     someip_add_offering_service(offer);
 
