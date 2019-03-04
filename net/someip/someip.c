@@ -118,3 +118,18 @@ someip_req_t request_service(someip_app_t *app, service_t service_id, instance_t
 }
 
 //int release_service(service_t my_id, service_t service_id, instance_t instance);
+
+static someip_app_t *app;
+
+static uint16_t ClientId = 0x4444;
+
+void Someip_Init()
+{
+	printf("[Someip] Someip_Init \n");
+	app = someip_register_app(ClientId);
+}
+
+void Someip_MainFunction()
+{
+}
+
