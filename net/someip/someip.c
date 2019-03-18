@@ -121,12 +121,30 @@ someip_req_t request_service(someip_app_t *app, service_t service_id, instance_t
 
 static someip_app_t *app;
 
+void sample_avail_handler(someip_requested_service_t *service)
+{
+}
+
+void sample_msg_handler(someip_t *someip)
+{
+}
+
+
+
+static uint16_t MethodId = 0x3333;
 static uint16_t ClientId = 0x4444;
 
 void Someip_Init()
 {
+	int i;
 	printf("[Someip] Someip_Init \n");
 	app = someip_register_app(ClientId);
+	for(i=0; i < Someip_Instance.NoOfServices; i++)
+	{
+		service_t service_id = (service_t)Someip_Instance.Service[i].Id;
+		instance_t instance = (instance_t)Someip_Instance.Service[i].InstanceId;
+		request_service(app, service_id, instance, MethodId, sample_avail_handler);
+	}
 }
 
 void Someip_MainFunction()
