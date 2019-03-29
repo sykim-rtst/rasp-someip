@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <someip/someip.h>
+#include "ComStack_Types.h"
 #include "someip-sd.h"
+#include "Someip_Cfg.h"
+
+#define MAKE_ID(x, y) (((uint32)(x) << 16) | (y))
 
 someip_app_t *someip_register_app(client_t my_id)
 {
@@ -92,8 +96,6 @@ int someip_unregister_state_handler(service_t my_id, service_t service_id, insta
 
 */
 
-int offer_service(service_t my_id, service_t service_id, instance_t instance);
-int stop_offer_service(service_t my_id, service_t service_id, instance_t instance);
 someip_req_t request_service(someip_app_t *app, service_t service_id, instance_t instance,
                              void (*avail_handler)(service_t service, instance_t instance, int available) )
 {
@@ -150,4 +152,39 @@ void Someip_Init()
 void Someip_MainFunction()
 {
 }
+
+void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
+{
+	uint8 *data = PduData->SduDataPtr;
+	someip_t *SomeipPtr = (someip_t *)data;
+	int i;
+	uint32 RequestId, NotifyId;
+	printf("[Someip] Someip_RxIndication %d\n", RxPduId);
+	for(i=0; i < Someip_Instance.NoOfServices; i++)
+	{
+		service_t id = Someip_Instance.Service[i].Id;
+		instance_t instance = Someip_Instance.Service[i].InstanceId;
+		method_t method = Someip_Instance.Service[i].MethodId;
+		uint16_t event = Someip_Instance.Service[i].EventId;
+		NotifyId = MAKE_ID(id, event);
+		RequestId = MAKE_ID(id, method);
+		printf("%x %x %x\n", SomeipPtr->msg_id, NotifyId, RequestId);
+		if(ntohl(SomeipPtr->msg_id) == NotifyId)
+		{
+			printf("[Someip] Get Notification\n");
+		}
+		else if(ntohl(SomeipPtr->msg_id) == RequestId)
+		{
+			printf("[Someip] Get Request\n");
+		}
+		else
+		{
+			printf("[Someip] Unknown Services\n");
+		}
+
+	}
+}
+
+
+
 
