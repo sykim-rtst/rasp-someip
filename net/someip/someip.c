@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <arpa/inet.h>
 #include <someip/someip.h>
 #include "ComStack_Types.h"
 #include "someip-sd.h"
@@ -152,6 +153,34 @@ void Someip_Init()
 void Someip_MainFunction()
 {
 }
+
+void Someip_SendPacket(PduInfoType *pduInfo, SoAd_SoConIdType tx_socket)
+{
+    TcpIp_SockAddrType destination;
+    uint8 netmask;
+    TcpIp_SockAddrType default_router;
+    destination.domain = TCPIP_AF_INET;
+    default_router.domain = TCPIP_AF_INET;
+    //(void)SoAd_GetRemoteAddr(multicast_rx_socket,  &destination);
+            /* Set the remote multicast address before sending */
+	destination.addr[0] = 10;
+	destination.addr[1] = 10;
+	destination.addr[2] = 0;
+	destination.addr[3] = 22;
+	destination.port = htons(SoAd_GetLastPort());
+	printf("[Someip] Send Packet %d\n", htons(SoAd_GetLastPort()));
+	(void)SoAd_SetRemoteAddr(tx_socket, &destination);
+	 const TcpIp_SockAddrType wildcard = {
+        (TcpIp_DomainType) TCPIP_AF_INET,
+        TCPIP_PORT_ANY,
+        {TCPIP_IPADDR_ANY, TCPIP_IPADDR_ANY, TCPIP_IPADDR_ANY, TCPIP_IPADDR_ANY }
+	};
+
+	SoAd_IfTransmit(tx_socket, pduInfo);
+	(void)SoAd_SetRemoteAddr(tx_socket, &wildcard);
+
+}
+
 
 void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 {
