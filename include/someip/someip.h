@@ -40,22 +40,9 @@ int someip_register_msg_handler(client_t my_id, service_t service_id,
                                 instance_t instance, method_t method, void (*msg_handler)(someip_t *someip));
 int someip_unregister_msg_handler(service_t my_id, service_t service_id,
                                   instance_t instance, method_t method);
-int someip_register_avail_handler(service_t my_id, service_t service_id,
-                                  instance_t instance, void (*avail_handler)(service_t service, instance_t instance, int available));
-int someip_unregister_avail_handler(service_t my_id, service_t service_id,
-                                    instance_t instance);
-int someip_register_state_handler(service_t my_id, service_t service_id,
-                                  instance_t instance, void (*state_handler)(int state));
-int someip_unregister_state_handler(service_t my_id, service_t service_id, instance_t instance);
-int offer_service(service_t my_id, service_t service_id, instance_t instance);
-int stop_offer_service(service_t my_id, service_t service_id, instance_t instance);
-someip_req_t request_service(someip_app_t *my_id, service_t service_id, instance_t instance,
-                             void (*avail_handler)(service_t service, instance_t instance, int available));
-int release_service(someip_app_t my_id, service_t service_id, instance_t instance);
 
-void run_someip_sd_srv(ip_addr_t *local_ip, unsigned short port);
-void run_someip_srv(ip_addr_t *local_ip, unsigned short port);
-void run_someip_handler(ip_addr_t *local_ip);
+void Someip_Init();
+void Someip_MainFunction();
+void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData);
 
-int someip_send_request(service_t service, instance_t instance, someip_t *packet);
 #endif
