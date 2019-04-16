@@ -48,56 +48,8 @@ int someip_unregister_msg_handler(service_t my_id, service_t service_id,
     return 0;
 }
 
-int someip_send_request(service_t service, instance_t instance, someip_t *packet)
-{
-    someip_offering_service_t *offer =
-        someip_find_offering_service(service, instance);
 
-    if(!offer) {
-        return -1;
-    }
-
-
-    send_packet(offer->ipv4_addr, offer->port, (char *)packet, packet->length + 8);
-
-}
-
-/*
-int someip_register_state_handler(service_t my_id, service_t service_id,
-                                  void (*state_hander)(int state));
-{
-    int err;
-    someip_requeted_service_t *req;
-
-    req = someip_find_service(service_id, my_id, instance);
-
-    if(!req) {
-        return RTWORKS_ERRNO_NOTFOUND;
-    }
-
-    req -> state_hander = state_handler;
-
-    return 0;
-}
-int someip_unregister_state_handler(service_t my_id, service_t service_id, instance_t instance);
-{
-    int err;
-    someip_requeted_service_t *req;
-
-    req = someip_find_service(service_id, my_id, instance);
-
-    if(!req) {
-        return RTWORKS_ERRNO_NOTFOUND;
-    }
-
-    req -> state_hander = state_handler;
-
-    return 0;
-}
-
-*/
-
-someip_req_t request_service(someip_app_t *app, service_t service_id, instance_t instance,
+someip_req_t request_service(someip_app_t *app, service_t service_id, instance_t instance, method_t method,
                              void (*avail_handler)(service_t service, instance_t instance, int available) )
 {
     someip_requested_service_t *srv;
