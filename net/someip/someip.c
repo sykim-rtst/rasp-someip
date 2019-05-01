@@ -159,6 +159,28 @@ void Someip_SendRequest(someip_requested_service_t *service)
 	Someip_SendPacket(&pduInfo, 2);
 }
 
+void Someip_SendResponse(someip_requested_service_t *service, uint8 *payload, uint32 length)
+{
+	uint8 buf[256];
+	someip_t *data = (someip_t *)buf;
+	data->length = htonl(8 + length);
+	data->msg_id = htonl(MAKE_ID(service->service_id, service->method));
+	data->req_id = htonl(MAKE_ID(service->req->client_id, service->req->req_id));
+	data->protocol_ver = 0x1;
+	data->interface_ver = 0x0;
+	data->msg_type = 0x80;
+	data->ret_code = 0x0;
+
+	PduInfoType pduInfo;
+	pduInfo.SduDataPtr = (uint8 *)data;
+	pduInfo.SduLength = 8 + ntohl(data->length);
+	
+	strncpy(data->payload, payload, length);
+	Someip_SendPacket(&pduInfo, 1);
+
+}
+
+
 
 void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 {
