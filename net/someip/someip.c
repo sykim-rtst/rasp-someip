@@ -205,11 +205,15 @@ void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 			if(service != NULL)
 				service->avail_handler(service);
 			Someip_SendRequest(service);
-
 		}
 		else if(ntohl(SomeipPtr->msg_id) == RequestId)
 		{
 			printf("[Someip] Get Request\n");
+			someip_requested_service_t *service = someip_find_req_service(id, ClientId, instance);
+			if(service != NULL)
+				service->avail_handler(service);
+
+			Someip_SendResponse(service, SomeipPtr->payload, ntohl(SomeipPtr->length) - 8);
 		}
 		else
 		{
