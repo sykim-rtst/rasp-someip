@@ -22,7 +22,8 @@ someip_app_t *someip_register_app(client_t my_id)
     }
 
     srv->client_id = my_id;
-    return srv;
+	srv->req_id	= 0;
+	return srv;
 }
 
 int someip_register_msg_handler(client_t my_id, service_t service_id,
