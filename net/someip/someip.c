@@ -178,10 +178,7 @@ void Someip_SendResponse(someip_requested_service_t *service, uint8 *payload, ui
 	
 	strncpy(data->payload, payload, length);
 	Someip_SendPacket(&pduInfo, 1);
-
 }
-
-
 
 void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 {
@@ -223,7 +220,3 @@ void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 
 	}
 }
-
-
-
-
