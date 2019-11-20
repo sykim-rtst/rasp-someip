@@ -22,7 +22,8 @@ someip_app_t *someip_register_app(client_t my_id)
     }
 
     srv->client_id = my_id;
-    return srv;
+	srv->req_id	= 0;
+	return srv;
 }
 
 int someip_register_msg_handler(client_t my_id, service_t service_id,
@@ -159,6 +160,25 @@ void Someip_SendRequest(someip_requested_service_t *service)
 	Someip_SendPacket(&pduInfo, 2);
 }
 
+void Someip_SendResponse(someip_requested_service_t *service, uint8 *payload, uint32 length)
+{
+	uint8 buf[256];
+	someip_t *data = (someip_t *)buf;
+	data->length = htonl(8 + length);
+	data->msg_id = htonl(MAKE_ID(service->service_id, service->method));
+	data->req_id = htonl(MAKE_ID(service->req->client_id, service->req->req_id));
+	data->protocol_ver = 0x1;
+	data->interface_ver = 0x0;
+	data->msg_type = 0x80;
+	data->ret_code = 0x0;
+
+	PduInfoType pduInfo;
+	pduInfo.SduDataPtr = (uint8 *)data;
+	pduInfo.SduLength = 8 + ntohl(data->length);
+	
+	strncpy(data->payload, payload, length);
+	Someip_SendPacket(&pduInfo, 1);
+}
 
 void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 {
@@ -183,11 +203,15 @@ void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 			if(service != NULL)
 				service->avail_handler(service);
 			Someip_SendRequest(service);
-
 		}
 		else if(ntohl(SomeipPtr->msg_id) == RequestId)
 		{
 			printf("[Someip] Get Request\n");
+			someip_requested_service_t *service = someip_find_req_service(id, ClientId, instance);
+			if(service != NULL)
+				service->avail_handler(service);
+
+			Someip_SendResponse(service, SomeipPtr->payload, ntohl(SomeipPtr->length) - 8);
 		}
 		else
 		{
@@ -196,7 +220,3 @@ void Someip_RxIndication(PduIdType RxPduId, const PduInfoType *PduData)
 
 	}
 }
-
-
-
-
